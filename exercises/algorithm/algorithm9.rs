@@ -1,8 +1,7 @@
 /*
-	heap
-	This question requires you to implement a binary heap function
+    heap
+    This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,9 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.count += 1;
+        self.items.push(value);
+        self.swim(self.count); // 插入后上移
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +58,56 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+
+        if right <= self.count && (self.comparator)(&self.items[right], &self.items[left]) {
+            right
+        } else {
+            left
+        }
+    }
+
+    // fn swim(&mut self, mut idx: usize) {
+    //     while idx > 1 && (self.comparator)(&self.items[idx], &self.items[self.parent_idx(idx)]) {
+    //         self.items.swap(idx, self.parent_idx(idx));
+    //         idx = self.parent_idx(idx);
+    //     }
+    // }
+    fn swim(&mut self, mut idx: usize) {
+        while idx > 1 {
+            let parent = self.parent_idx(idx); // 先获取父节点索引，避免重复借用
+            if (self.comparator)(&self.items[idx], &self.items[parent]) {
+                self.items.swap(idx, parent);
+                idx = parent;
+            } else {
+                break;
+            }
+        }
+    }
+
+    fn sink(&mut self, mut idx: usize) {
+        while self.children_present(idx) {
+            let smaller_child = self.smallest_child_idx(idx);
+            if !(self.comparator)(&self.items[smaller_child], &self.items[idx]) {
+                break;
+            }
+            self.items.swap(idx, smaller_child);
+            idx = smaller_child;
+        }
+    }
+
+    pub fn pop(&mut self) -> Option<T> {
+        if self.count == 0 {
+            return None;
+        }
+        self.items.swap(1, self.count);
+        let min = self.items.pop();
+        self.count -= 1;
+        if self.count > 0 {
+            self.sink(1);
+        }
+        min
     }
 }
 
@@ -84,8 +133,7 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        self.pop()
     }
 }
 

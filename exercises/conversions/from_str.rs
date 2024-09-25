@@ -31,8 +31,6 @@ enum ParsePersonError {
     ParseInt(ParseIntError),
 }
 
-// I AM NOT DONE
-
 // Steps:
 // 1. If the length of the provided string is 0, an error should be returned
 // 2. Split the given string on the commas present in it
@@ -52,6 +50,34 @@ enum ParsePersonError {
 impl FromStr for Person {
     type Err = ParsePersonError;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        // 如果字符串为空，返回默认值
+        if s.is_empty() {
+            return Err(ParsePersonError::Empty);
+        }
+
+        // 使用 split 进行分割
+        let parts: Vec<&str> = s.split(',').collect();
+
+        // 如果分割后的部分不是两部分（即多于两个或少于两个），返回默认值
+        if parts.len() != 2 {
+            return Err(ParsePersonError::BadLen);
+        }
+
+        // 获取名字并确保不为空
+        let name_part = parts[0];
+        if name_part.is_empty() {
+            return Err(ParsePersonError::NoName);
+        }
+
+        // 获取年龄部分并尝试解析为 usize
+        let age_part = parts[1];
+        match age_part.parse::<usize>() {
+            Ok(age) => Ok(Person {
+                name: name_part.to_string(),
+                age,
+            }),
+            Err(e) => Err(ParsePersonError::ParseInt(e)),
+        }
     }
 }
 
